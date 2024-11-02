@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv(r"D:\UNI\NN\labs\lab 3\birds.csv")
+df = pd.read_csv(r"/Users/habibaalaa/Downloads/Senior Year/NN/Lab3/birds.csv")
 
 print(df.head())
 
@@ -33,11 +33,11 @@ def min_max_normalize(column):
     normalized_column = (column - min_value) / (max_value - min_value)
     return normalized_column
 
-df['gender'] = min_max_normalize(df['gender'])
 df['body_mass'] = min_max_normalize(df['body_mass'])
 df['beak_length'] = min_max_normalize(df['beak_length'])
 df['beak_depth'] = min_max_normalize(df['beak_depth'])
 df['fin_length'] = min_max_normalize(df['fin_length'])
-df['bird category'] = min_max_normalize(df['bird category'])
 
 print(df)
+
+df.to_csv(r"/Users/habibaalaa/Downloads/Senior Year/NN/Lab3/birds_preprocessed.csv", index=False)
