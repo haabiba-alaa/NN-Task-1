@@ -3,14 +3,14 @@ from tkinter import messagebox
 import pandas as pd
 import numpy as np
 from perceptron import Perceptron
-from adeline import Adeline
+from adaline import Adaline
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from testing import *
 
 
 # Load your dataset
-df = pd.read_csv(r"D:\UNI\NN\Task 1\NN-Tasks\preprocessed_birds.csv")
+df = pd.read_csv("/Users/habibaalaa/NN-Task-1/birds_preprocessed.csv")
 print(df)
 class_mapping = {
     "A": 0,
@@ -122,7 +122,7 @@ def train(selected_features, selected_classes, learning_rate, epochs, bias, algo
     if algorithm == 'Perceptron':
         model = Perceptron(eta=learning_rate, n_iter=epochs,init_bias=bias)
     else:
-        model = Adeline(eta=learning_rate, n_iter=epochs,init_bias=bias,init_threshold=mse_threshold)
+        model = Adaline(eta=learning_rate, n_iter=epochs,init_bias=bias,init_threshold=mse_threshold)
 
     model.fit(X_train, y_train)
     print(model)
