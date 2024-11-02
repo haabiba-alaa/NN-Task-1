@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv(r"/Users/habibaalaa/Downloads/Senior Year/NN/Lab3/birds.csv")
+df = pd.read_csv(r"D:\UNI\NN\Task 1\NN-Tasks\birds.csv")
 
 print(df.head())
 
@@ -40,4 +40,4 @@ df['fin_length'] = min_max_normalize(df['fin_length'])
 
 print(df)
 
-df.to_csv(r"/Users/habibaalaa/Downloads/Senior Year/NN/Lab3/birds_preprocessed.csv", index=False)
+df.to_csv(r"D:\UNI\NN\Task 1\NN-Tasks\preprocessed_birds.csv", index=False)

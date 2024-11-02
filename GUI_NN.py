@@ -3,14 +3,15 @@ from tkinter import messagebox
 import pandas as pd
 import numpy as np
 from perceptron import Perceptron
+from adeline import Adeline
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from testing import *
 
 
 # Load your dataset
-df = pd.read_csv(r"/Users/habibaalaa/Downloads/Senior Year/NN/Lab3/birds_preprocessed.csv")
-
+df = pd.read_csv(r"D:\UNI\NN\Task 1\NN-Tasks\preprocessed_birds.csv")
+print(df)
 class_mapping = {
     "A": 0,
     "B": 1,
@@ -79,7 +80,7 @@ def plot_decision_boundary(X, y, model):
     canvas.draw()
     canvas.get_tk_widget().pack()
 
-def train_perceptron(selected_features, selected_classes, learning_rate, epochs, bias):
+def train(selected_features, selected_classes, learning_rate, epochs, bias, algorithm,mse_threshold):
     print("Original DataFrame shape:", df.shape)
     print("Unique values in 'bird category':", df['bird category'].unique())
     
@@ -118,9 +119,13 @@ def train_perceptron(selected_features, selected_classes, learning_rate, epochs,
     print("y_test shape:", y_test.shape)
 
     # Initialize and fit the perceptron model
-    model = Perceptron(eta=learning_rate, n_iter=epochs,init_bias=bias)
-    model.fit(X_train, y_train)
+    if algorithm == 'Perceptron':
+        model = Perceptron(eta=learning_rate, n_iter=epochs,init_bias=bias)
+    else:
+        model = Adeline(eta=learning_rate, n_iter=epochs,init_bias=bias,init_threshold=mse_threshold)
 
+    model.fit(X_train, y_train)
+    print(model)
     # Make predictions
     y_pred = model.predict(X_test)
     cm = confusion_matrix(y_test, y_pred)
@@ -153,7 +158,7 @@ def submit():
     epochs = epochs_var.get()
     mse_threshold = mse_threshold_var.get()
     bias = bias_var.get()
-
+    algorithm=algorithm_var.get()
     # Display the entered values
     message = (f"Selected Features: {', '.join(selected_features)}\n"
                f"Selected Classes: {selected_classes}\n"
@@ -165,7 +170,7 @@ def submit():
     messagebox.showinfo("Submitted Data", message)
 
     # Train the Perceptron model
-    train_perceptron(selected_features, selected_classes, learning_rate, epochs, bias)
+    train(selected_features, selected_classes, learning_rate, epochs, bias, algorithm,mse_threshold)
 
 # Feature Selection
 feature_label = tk.Label(root, text="Select Two Features:")
@@ -208,6 +213,7 @@ mse_threshold_label.pack()
 mse_threshold_var = tk.DoubleVar(value=0.01)  # Default value
 mse_threshold_entry = tk.Entry(root, textvariable=mse_threshold_var)
 mse_threshold_entry.pack()
+
 
 # Add Bias
 bias_var = tk.BooleanVar(value=False)  # Default value
