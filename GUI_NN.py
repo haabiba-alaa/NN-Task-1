@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from testing import *
 
+
 # Load your dataset
 df = pd.read_csv(r"/Users/habibaalaa/Downloads/Senior Year/NN/Lab3/birds_preprocessed.csv")
 
@@ -48,16 +49,22 @@ def plot_decision_boundary(X, y, model):
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     x_values = np.linspace(x_min, x_max, 100)
 
-    if len(model.w_) >= 3 and model.w_[2] != 0:
-        y_values = -(model.w_[0] + model.w_[1] * x_values) / model.w_[2]
-    else:
-        y_values = np.full_like(x_values, np.nan)
+    # Ensure we are handling the correct number of features
+    if X.shape[1] == 2:
+        # Calculate decision boundary only if there are two features
+        y_values = -(model.w_[0] * x_values + model.bias_) / model.w_[1]  # Equation of the line
 
-    ax.scatter(X[y == 1][:, 0], X[y == 1][:, 1], color='blue', marker='o', label='Class 1')
-    ax.scatter(X[y == -1][:, 0], X[y == -1][:, 1], color='red', marker='x', label='Class -1')
-    
-    if np.all(~np.isnan(y_values)):
+        # Plot the points for the two classes
+        ax.scatter(X[y == 1][:, 0], X[y == 1][:, 1], color='blue', marker='o', label='Class 1')
+        ax.scatter(X[y == -1][:, 0], X[y == -1][:, 1], color='red', marker='x', label='Class -1')
+
+        # Plot decision boundary
         ax.plot(x_values, y_values, color='green', linestyle='--', label='Decision Boundary')
+    
+    else:
+        # For higher dimensions, you may want to handle them differently or provide a warning
+        ax.text(0.5, 0.5, "Decision boundary visualization only supported for 2D data.", 
+                horizontalalignment='center', verticalalignment='center', fontsize=12, color='black')
 
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
@@ -72,7 +79,7 @@ def plot_decision_boundary(X, y, model):
     canvas.draw()
     canvas.get_tk_widget().pack()
 
-def train_perceptron(selected_features, selected_classes, learning_rate, epochs, mse_threshold, bias):
+def train_perceptron(selected_features, selected_classes, learning_rate, epochs, bias):
     print("Original DataFrame shape:", df.shape)
     print("Unique values in 'bird category':", df['bird category'].unique())
     
@@ -111,7 +118,7 @@ def train_perceptron(selected_features, selected_classes, learning_rate, epochs,
     print("y_test shape:", y_test.shape)
 
     # Initialize and fit the perceptron model
-    model = Perceptron(eta=learning_rate, n_iter=epochs)
+    model = Perceptron(eta=learning_rate, n_iter=epochs,init_bias=bias)
     model.fit(X_train, y_train)
 
     # Make predictions
@@ -158,7 +165,7 @@ def submit():
     messagebox.showinfo("Submitted Data", message)
 
     # Train the Perceptron model
-    train_perceptron(selected_features, selected_classes, learning_rate, epochs, mse_threshold, bias)
+    train_perceptron(selected_features, selected_classes, learning_rate, epochs, bias)
 
 # Feature Selection
 feature_label = tk.Label(root, text="Select Two Features:")
