@@ -8,8 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from testing import *
 
-
-# Load your dataset
+# Dataset Loading
 df = pd.read_csv("/Users/habibaalaa/NN-Task-1/birds_preprocessed.csv")
 print(df)
 class_mapping = {
@@ -22,18 +21,18 @@ root = tk.Tk()
 root.title("Bird Species Classification")
 
 def plot_confusion_matrix(cm):
-    # Create a new window for the confusion matrix
+    # new window for the cm
     cm_window = tk.Toplevel(root)
     cm_window.title("Confusion Matrix")
 
-    fig, ax = plt.subplots(figsize=(10, 6))  # Increased figure size
+    fig, ax = plt.subplots(figsize=(10, 6))  
     ax.matshow(cm, cmap=plt.cm.Blues, alpha=0.3)
     for (i, j), value in np.ndenumerate(cm):
         ax.text(j, i, f'{value}', ha='center', va='center')
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix')
-    plt.tight_layout()  # Ensure everything fits without overlap
+    plt.tight_layout()  
     
     # Plot on a canvas in the new window
     canvas = FigureCanvasTkAgg(fig, master=cm_window)
@@ -41,31 +40,21 @@ def plot_confusion_matrix(cm):
     canvas.get_tk_widget().pack()
 
 def plot_decision_boundary(X, y, model):
-    # Create a new window for the decision boundary
+    # new window for decision boundary
     boundary_window = tk.Toplevel(root)
     boundary_window.title("Decision Boundary")
 
-    fig, ax = plt.subplots(figsize=(15, 15))  # Increased figure size
+    fig, ax = plt.subplots(figsize=(15, 15)) 
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     x_values = np.linspace(x_min, x_max, 100)
 
-    # Ensure we are handling the correct number of features
-    if X.shape[1] == 2:
-        # Calculate decision boundary only if there are two features
-        y_values = -(model.w_[0] * x_values + model.bias_) / model.w_[1]  # Equation of the line
+    y_values = -(model.w_[0] * x_values + model.bias_) / model.w_[1] 
 
-        # Plot the points for the two classes
-        ax.scatter(X[y == 1][:, 0], X[y == 1][:, 1], color='blue', marker='o', label='Class 1')
-        ax.scatter(X[y == -1][:, 0], X[y == -1][:, 1], color='red', marker='x', label='Class -1')
+    ax.scatter(X[y == 1][:, 0], X[y == 1][:, 1], color='blue', marker='o', label='Class 1')
+    ax.scatter(X[y == -1][:, 0], X[y == -1][:, 1], color='red', marker='x', label='Class -1')
 
-        # Plot decision boundary
-        ax.plot(x_values, y_values, color='green', linestyle='--', label='Decision Boundary')
-    
-    else:
-        # For higher dimensions, you may want to handle them differently or provide a warning
-        ax.text(0.5, 0.5, "Decision boundary visualization only supported for 2D data.", 
-                horizontalalignment='center', verticalalignment='center', fontsize=12, color='black')
+    ax.plot(x_values, y_values, color='green', linestyle='--', label='Decision Boundary')
 
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
@@ -75,7 +64,6 @@ def plot_decision_boundary(X, y, model):
     ax.set_title("Decision Boundary for Perceptron Model")
     ax.grid()
 
-    # Plot on a canvas in the new window
     canvas = FigureCanvasTkAgg(fig, master=boundary_window)
     canvas.draw()
     canvas.get_tk_widget().pack()
@@ -84,33 +72,30 @@ def train(selected_features, selected_classes, learning_rate, epochs, bias, algo
     print("Original DataFrame shape:", df.shape)
     print("Unique values in 'bird category':", df['bird category'].unique())
     
-    # Parse selected classes
     class_labels = selected_classes.split(" & ")
 
-    # Map class labels to indices
+    # Mapping 
     class_indices = [class_mapping[label.strip()] for label in class_labels]
     
-    # Filter DataFrame based on selected classes
+    # Filter df (Classes)
     df_filtered = df[df['bird category'].isin(class_indices)]
     print("Filtered DataFrame shape:", df_filtered.shape)
 
     print("DataFrame Columns:", df_filtered.columns)
     print("Selected Features:", selected_features)
 
-    # Extract features and labels
+    # Extract features
     X = df_filtered[selected_features].to_numpy()
     y = df_filtered['bird category'].to_numpy()
     
-    # Verify feature and label shapes
+    # Checking
     print("X shape:", X.shape)
     print("y shape:", y.shape)
     print(X)
     print(y)
 
-    # Convert classes to -1 and 1
     y = np.where(y == class_indices[0], -1, 1) 
 
-    # Call custom_train_test_split with defined sizes
     (X_train, y_train), (X_test, y_test) = TTS(X, y)
     
     print("X_train shape:", X_train.shape)
@@ -118,25 +103,26 @@ def train(selected_features, selected_classes, learning_rate, epochs, bias, algo
     print("X_test shape:", X_test.shape)
     print("y_test shape:", y_test.shape)
 
-    # Initialize and fit the perceptron model
-    if algorithm == 'Perceptron':
-        model = Perceptron(eta=learning_rate, n_iter=epochs,init_bias=bias)
+    print("Selected algorithm:", algorithm)
+    
+    if algorithm == 'Adaline':
+        model = Adaline(eta=learning_rate, n_iter=epochs, init_bias=bias, init_threshold=mse_threshold)
+        #model = Adaline()
     else:
-        model = Adaline(eta=learning_rate, n_iter=epochs,init_bias=bias,init_threshold=mse_threshold)
-
+        model = Perceptron(eta=learning_rate, n_iter=epochs, init_bias=bias)
+    
     model.fit(X_train, y_train)
-    print(model)
-    # Make predictions
+    print("Training completed")
+    print(model.errors_)
     y_pred = model.predict(X_test)
     cm = confusion_matrix(y_test, y_pred)
     
-    # Calculate accuracy
     accuracy = calculate_accuracy(y_test, y_pred)
     print("Predictions:", y_pred)
     print("True labels:", y_test)
     print("Calculated Accuracy:", accuracy)
 
-    # Update accuracy label
+    # Print accuracy label
     messagebox.showinfo("Training Result", f"Accuracy: {accuracy:.2f}%")
 
     # Plot confusion matrix
@@ -145,7 +131,6 @@ def train(selected_features, selected_classes, learning_rate, epochs, bias, algo
     # Plot decision boundary
     plot_decision_boundary(X_test, y_test, model)
         
-
 def submit():
     selected_features = [feature for feature, var in feature_vars.items() if var.get()]
     
@@ -153,13 +138,12 @@ def submit():
         messagebox.showwarning("Warning", "Please select exactly two features.")
         return
     
-    selected_classes = class_var.get()  # Get the selected classes as a string
+    selected_classes = class_var.get()  
     learning_rate = learning_rate_var.get()
     epochs = epochs_var.get()
     mse_threshold = mse_threshold_var.get()
     bias = bias_var.get()
     algorithm=algorithm_var.get()
-    # Display the entered values
     message = (f"Selected Features: {', '.join(selected_features)}\n"
                f"Selected Classes: {selected_classes}\n"
                f"Learning Rate: {learning_rate}\n"
@@ -169,7 +153,6 @@ def submit():
 
     messagebox.showinfo("Submitted Data", message)
 
-    # Train the Perceptron model
     train(selected_features, selected_classes, learning_rate, epochs, bias, algorithm,mse_threshold)
 
 # Feature Selection
